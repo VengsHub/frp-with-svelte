@@ -1,11 +1,10 @@
-import { writable } from 'svelte/store';
-import type { Writable } from 'svelte/store';
+import { derived, readable, writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 
-// pass store in instead of initializing it here?
-export const fromEvent = (element: HTMLElement | Document, eventName: string): Writable<Event> => {
-  const store = writable<Event>();
-  element.addEventListener(eventName, event => store.set(event));
-  // unsubscribe?
+export const toReadable = (writable: Writable<any>): Readable<any> => derived(writable, w => w);
 
-  return store;
-}
+export const fromEvent = (element: HTMLElement|Document, eventName: string): Readable<Event> =>
+    readable<Event>(undefined, (set) => {
+      element.addEventListener(eventName, event => set(event));
+      return element.removeEventListener(eventName, event => set(event));
+    });
